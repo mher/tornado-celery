@@ -15,9 +15,7 @@ Launch the server: ::
 
     $ celeryr --blocking
 
-And call tasks from Tornado RequestHandler:
-
-.. code-block:: python
+And call tasks from Tornado RequestHandler: ::
 
     from tornado import gen, web
     from tcelery import Task
@@ -31,9 +29,8 @@ And call tasks from Tornado RequestHandler:
             self.write("Done!")
             self.finish()
 
-Or by using generator-based interface:
+Or by using generator-based interface: ::
 
-.. code-block:: python
     class GenMultipleAsyncHandler(web.RequestHandler):
         @web.asynchronous
         @gen.engine
