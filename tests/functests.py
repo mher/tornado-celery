@@ -3,28 +3,31 @@ import unittest
 import requests
 
 from urlparse import urljoin
-from tcelery.utils import from_json
+from tornado import ioloop
+from tornado.escape import json_encode, json_decode
+
+from tcelery import Task
 
 
 class TestCase(unittest.TestCase):
     base_url = "http://localhost:8888"
 
     def post(self, url, data=None):
-        data = data or {}
+        data = json_encode(data or {})
         response = requests.post(urljoin(self.base_url, url), data=data)
-        msg = from_json(response.content) if response.ok else None
+        msg = json_decode(response.content) if response.ok else None
         return response, msg
 
     def get(self, url, data=None):
-        data = data or {}
+        data = json_encode(data or {})
         response = requests.get(urljoin(self.base_url, url), data=data)
-        return response, from_json(response.content)
+        return response, json_decode(response.content)
 
 
 class AsyncTaskTests(TestCase):
     def test_acync_apply(self):
         response, msg = self.post('/async-apply/tasks.echo/',
-                                  data={'args': 'foo'})
+                                  data={'args': ['foo']})
         self.assertTrue(response.ok)
         task_id =  msg['task-id']
 
@@ -48,6 +51,19 @@ class AsyncTaskTests(TestCase):
         self.assertEqual('SUCCESS', msg['state'])
         self.assertEqual(3, msg['result'])
 
+    def test_async_apply_with_kwargs(self):
+        response, msg = self.post('/async-apply/tasks.echo/',
+                data={'args': ['foo'], 'kwargs': {'timestamp':True}})
+        self.assertTrue(response.ok)
+        task_id =  msg['task-id']
+
+        time.sleep(0.25)
+
+        response, msg = self.get('/tasks/result/%s/' % task_id)
+        self.assertTrue(response.ok)
+        self.assertEqual('SUCCESS', msg['state'])
+        self.assertTrue(msg['result'].endswith('foo'))
+
     def test_unknown_task(self):
         response, msg = self.post('/async-apply/foo/')
         self.assertFalse(response.ok)
@@ -60,13 +76,13 @@ class AsyncTaskTests(TestCase):
 
 class TaskTests(TestCase):
     def test_apply(self):
-        response, msg = self.post('/apply/tasks.echo/', data={'args': 'foo'})
+        response, msg = self.post('/apply/tasks.echo/', data={'args': ['foo']})
         self.assertTrue(response.ok)
         self.assertEqual('foo', msg['result'])
 
     def test_apply_with_timeout(self):
         response, msg = self.post('/apply/tasks.sleep/',
-                                  data={'args': '5', 'timeout': 0.5})
+                                  data={'args': [5], 'timeout': 0.5})
         self.assertTrue(response.ok)
         self.assertFalse('result' in msg)
 
@@ -99,18 +115,42 @@ class TaskStatusTests(TestCase):
 class TimingTests(TestCase):
     def test_eta(self):
         response, msg = self.post('/apply/tasks.echo/',
-                                  data={'args': 'foo', 'timeout': 0.5,
+                                  data={'args': ['foo'], 'timeout': 0.5,
                                         'countdown': 5})
         self.assertTrue(response.ok)
         self.assertFalse('result' in msg)
 
     def test_expires(self):
         response, msg= self.post('/apply/tasks.echo/',
-                                 data={'args': 'foo',
+                                 data={'args': ['foo'],
                                        'countdown': 5, 'expires': 1})
         self.assertTrue(response.ok)
         self.assertEqual('REVOKED', msg['state'])
         self.assertFalse('result' in msg)
+
+
+class TaskClassTests(unittest.TestCase):
+    def test_async(self):
+        def done(response):
+            ioloop.IOLoop.instance().stop()
+            self.assertEqual("hello", json_decode(response.body)["result"])
+        Task("tasks.echo", callback=done)("hello")
+        ioloop.IOLoop.instance().start()
+
+    def test_async_with_mult_args(self):
+        def done(response):
+            ioloop.IOLoop.instance().stop()
+            self.assertEqual(3, json_decode(response.body)["result"])
+        Task("tasks.add", callback=done)(1, 2)
+        ioloop.IOLoop.instance().start()
+
+
+    def test_async_with_kwargs(self):
+        def done(response):
+            ioloop.IOLoop.instance().stop()
+            self.assertTrue(json_decode(response.body)["result"].endswith("hello"))
+        Task("tasks.echo", callback=done)("hello", timestamp=True)
+        ioloop.IOLoop.instance().start()
 
 
 if __name__ == "__main__":
