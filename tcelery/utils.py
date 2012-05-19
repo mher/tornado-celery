@@ -1,9 +1,4 @@
-import json
 import tornado.web
-
-
-to_json = lambda x: json.dumps(x)
-from_json = lambda x: json.loads(x)
 
 
 class route(object):

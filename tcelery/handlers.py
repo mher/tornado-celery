@@ -7,29 +7,23 @@ from functools import partial
 from tornado import web
 from tornado import ioloop
 from tornado.options import options as tornado_options
+from tornado.escape import json_decode
 
 from celery.result import AsyncResult
 from celery.task.control import inspect
 from celery.task.control import revoke
 from celery.execute import send_task
 
-from .utils import route, to_json
+from .utils import route
 
 
 class ApplyHandlerBase(web.RequestHandler):
     registered_tasks = []
 
     def get_task_args(self):
-        options = dict(self.request.arguments)
+        options = json_decode(self.request.body)
         args = options.pop('args', [])
         kwargs = options.pop('kwargs', {})
-        for o, v in options.iteritems():
-            options[o] = v[0]
-            try:
-                options[o] = float(v[0])
-                options[o] = int(v[0])
-            except:
-                pass
         return args, kwargs, options
 
     @classmethod
@@ -42,7 +36,7 @@ class ApplyHandlerBase(web.RequestHandler):
             cls.registered_tasks = set(tasks)
 
         return cls.registered_tasks
-
+    
 
 @route('/async-apply/(.*)/')
 class AsyncApplyHandler(ApplyHandlerBase):
@@ -52,7 +46,7 @@ class AsyncApplyHandler(ApplyHandlerBase):
 
         args, kwargs, options = self.get_task_args()
         result = send_task(taskname, args=args, kwargs=kwargs)
-        self.write(to_json({'task-id': result.task_id, 'state': result.state}))
+        self.write({'task-id': result.task_id, 'state': result.state})
 
 
 @route('/tasks/result/(.*)/')
@@ -62,14 +56,14 @@ class TaskResultHandler(web.RequestHandler):
         response = {'task-id': task_id, 'state': result.state}
         if result.ready():
             response.update({'result': result.result}) 
-        self.write(to_json(response))
+        self.write(response)
 
 
 @route('/tasks/revoke/(.*)/')
 class TaskRevokeHandler(web.RequestHandler):
     def delete(self, task_id):
         revoke(task_id)
-        self.write(to_json({'task-id': task_id}))
+        self.write({'task-id': task_id})
 
 
 @route('/apply/(.*)/')
@@ -101,7 +95,7 @@ class ApplyHandler(ApplyHandlerBase):
         response = {'task-id': task_id, 'state': result.state}
         if result.successful():
             response.update({'result': result.result})
-        handler.write(to_json(response))
+        handler.write(response)
         if htimeout:
             ioloop.IOLoop.instance().remove_timeout(htimeout)
         handler.finish()
@@ -110,7 +104,7 @@ class ApplyHandler(ApplyHandlerBase):
     def on_time(cls, task_id):
         result, handler, _ = cls.tasks.pop(task_id)
         revoke(task_id)
-        handler.write(to_json({'task-id': task_id, 'state': result.state}))
+        handler.write({'task-id': task_id, 'state': result.state})
         handler.finish()
 
 
@@ -119,7 +113,7 @@ class RegisteredTaskHandler(web.RequestHandler):
     def get(self, host):
         host = [host] if host else None
         i = inspect(host)
-        self.write(to_json(i.registered()))
+        self.write(i.registered())
 
 
 @route('/tasks/active/(.*)')
@@ -127,7 +121,7 @@ class ActiveTaskHandler(web.RequestHandler):
     def get(self, host):
         host = [host] if host else None
         i = inspect(host)
-        self.write(to_json(i.active()))
+        self.write(i.active())
 
 
 @route('/tasks/scheduled/(.*)')
@@ -135,7 +129,7 @@ class ScheduledTaskHandler(web.RequestHandler):
     def get(self, host):
         host = [host] if host else None
         i = inspect(host)
-        self.write(to_json(i.active()))
+        self.write(i.active())
 
 
 @route('/')
