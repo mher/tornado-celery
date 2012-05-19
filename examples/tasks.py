@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 
 from celery import Celery
 
@@ -18,8 +19,8 @@ def sleep(seconds):
 
 
 @celery.task
-def echo(msg):
-    return msg
+def echo(msg, timestamp=False):
+    return "%s: %s" % (datetime.now(), msg) if timestamp else msg
 
 
 @celery.task
