@@ -5,6 +5,10 @@ from tornado.httpclient import AsyncHTTPClient
 from tornado.escape import json_encode
 
 
+VERSION = (0, 1, 0)
+__version__ = '.'.join(map(str, VERSION))
+
+
 class Task(gen.Task):
     def __init__(self, func, *args, **kwargs):
         self.http_client = AsyncHTTPClient()
