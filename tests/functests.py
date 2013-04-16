@@ -3,10 +3,10 @@ import unittest
 import requests
 
 from urlparse import urljoin
-from tornado import ioloop
+from tornado import ioloop, gen
 from tornado.escape import json_encode, json_decode
 
-from tcelery import Task
+import tasks
 
 
 class TestCase(unittest.TestCase):
@@ -134,14 +134,14 @@ class TaskClassTests(unittest.TestCase):
         def done(response):
             ioloop.IOLoop.instance().stop()
             self.assertEqual("hello", json_decode(response.body)["result"])
-        Task("tasks.echo", callback=done)("hello")
+        yield gen.Task(tasks.echo.apply_async, args=['hello'], callback=done)
         ioloop.IOLoop.instance().start()
 
     def test_async_with_mult_args(self):
         def done(response):
             ioloop.IOLoop.instance().stop()
             self.assertEqual(3, json_decode(response.body)["result"])
-        Task("tasks.add", callback=done)(1, 2)
+        yield gen.Task(tasks.add.apply_async, args=[1,2], callback=done)
         ioloop.IOLoop.instance().start()
 
 
@@ -149,7 +149,8 @@ class TaskClassTests(unittest.TestCase):
         def done(response):
             ioloop.IOLoop.instance().stop()
             self.assertTrue(json_decode(response.body)["result"].endswith("hello"))
-        Task("tasks.echo", callback=done)("hello", timestamp=True)
+        yield gen.Task(tasks.echo, args=['hello'], kwargs={'timestamp': True},
+                       callback=done)
         ioloop.IOLoop.instance().start()
 
 
