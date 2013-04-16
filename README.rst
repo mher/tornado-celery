@@ -1,47 +1,43 @@
-tornado-celery: Celery integration with Tornado
-===============================================
+Celery integration with Tornado
+===============================
 
-tornado-celery is an experimental tool intended to simplify the usage
-of Celery in Tornado web framework. From one side tornado-celery is a
-web application which exposes the functionality of Celery via the REST
-interface (task are executed and controlled by HTTP **GET**, **POST**
-and **DELETE** methods). From the other side it helps to call tasks and
-asynchronously get the result from the RequestHandler.
+tornado-celery is a non-blocking Celery client for Tornado web framework.
 
 Usage
 -----
 
-Launch the server: ::
-
-    $ celeryr --blocking
-
-And call tasks from Tornado RequestHandler: ::
+Calling Celery tasks from Tornado RequestHandler: ::
 
     from tornado import gen, web
-    from tcelery import Task
+    import tcelery, tasks
+
+    tcelery.setup_nonblocking_producer()
 
     class AsyncHandler(web.RequestHandler):
-        @web.asynchronous
+        @asynchronous
         def get(self):
-            Task("tasks.sleep", callback=self.on_task_complete)(3)
+            tasks.echo.apply_async(args=['Hello world!'], callback=self.on_result)
 
-        def on_task_complete(self, response):
-            self.write("Done!")
+        def on_result(self, response):
+            self.write(str(response.result))
             self.finish()
 
-Or by using generator-based interface: ::
+Calling tasks with generator-based interface: ::
 
-    class GenMultipleAsyncHandler(web.RequestHandler):
-        @web.asynchronous
-        @gen.engine
+    class GenAsyncHandler(web.RequestHandler):
+        @asynchronous
+        @gen.coroutine
         def get(self):
-            r1, r2 = yield [Task("tasks.sleep", 3), Task("tasks.add", 1, 2)]
-            self.write(str(r1.body))
-            self.write(str(r2.body))
+            response = yield gen.Task(tasks.sleep.apply_async, args=[3])
+            self.write(str(response.result))
             self.finish()
 
-tornado-celery can be used to call Celery tasks from other languages and
-environments.
+.. NOTE::
+   Currently callbacks only work with AMQP backend
+
+tornado-celery can be launched as a web server: ::
+
+    $ python -m tcelery --port=8888
 
 Execute a task asynchronously: ::
 
@@ -62,21 +58,6 @@ Execute a task with timeout: ::
 
     $ curl -X POST -d '{"args":[5],"timeout":1}' http://localhost:8888/apply/tasks.sleep/
     {"task-id": "9ca78e26-bbb2-404c-b3bb-bc1c63cbdf41", "state": "REVOKED"}
-
-List all registered tasks: ::
-
-    $ curl http://localhost:8888/tasks/registered/
-    {"localhost": ["celery.backend_cleanup", "celery.chain", "celery.chord", "celery.chord_unlock", "celery.chunks", "celery.group", "celery.map", "celery.starmap", "tasks.add", "tasks.echo", "tasks.error", "tasks.sleep"]}
-
-List active tasks: ::
-
-    $ curl http://localhost:8888/tasks/active/
-    {"localhost": [{"hostname": "localhost", "time_start": 1337432111.714233, "name": "tasks.sleep", "delivery_info": {"routing_key": "celery", "exchange": "celery"}, "args": "[20]", "acknowledged": true, "kwargs": "{}", "id": "52385dc9-ed99-4e9a-9ce0-ff94a54cf565", "worker_pid": 5896}]}
-
-List scheduled tasks: ::
-
-    $ curl http://localhost:8888/tasks/scheduled/
-    {"localhost": []}
 
 Installation
 ------------
