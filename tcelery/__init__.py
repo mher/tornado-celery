@@ -1,29 +1,26 @@
-from urlparse import urljoin
+from __future__ import absolute_import
 
-from tornado import gen
-from tornado.httpclient import AsyncHTTPClient
-from tornado.escape import json_encode
+import celery
+
+from tornado import ioloop
+
+from .producer import AsyncTaskProducer, PikaClient
 
 
 VERSION = (0, 1, 0)
 __version__ = '.'.join(map(str, VERSION))
 
 
-class Task(gen.Task):
-    def __init__(self, func, *args, **kwargs):
-        self.http_client = AsyncHTTPClient()
-        self.callback = kwargs.pop("callback", None)
+def setup_nonblocking_producer(celery_app=None, io_loop=None):
+    celery_app = celery_app or celery.current_app
+    io_loop = io_loop or ioloop.IOLoop.instance()
 
-        server = kwargs.pop("server", "http://localhost:8888")
-        assert isinstance(func, basestring)
-        self.url = urljoin(server, "apply/%s/" % func)
+    AsyncTaskProducer.app = celery_app
+    AsyncTaskProducer.producer = PikaClient()
+    celery.app.amqp.AMQP.producer_cls = AsyncTaskProducer
 
-        super(Task, self).__init__(
-                self.http_client.fetch, self.url, method="POST",
-                body=json_encode({"args": args, "kwargs": kwargs}))
+    def connect():
+        broker_url = celery_app.connection().as_uri(include_password=True)
+        AsyncTaskProducer.producer.connect(broker_url)
 
-    def __call__(self, *args, **kwargs):
-        assert self.callback
-        return self.http_client.fetch(
-                    self.url, self.callback, method="POST",
-                    body=json_encode({"args": args, "kwargs": kwargs}))
+    io_loop.add_callback(connect)

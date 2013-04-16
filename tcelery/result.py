@@ -1,28 +1,28 @@
 from __future__ import absolute_import
 from __future__ import with_statement
 
-from functools import partial
-
-from tornado import ioloop
-
-from .handlers import ApplyHandler
+import celery
 
 
-class PeriodicResultChecker(object):
-    def __init__(self, io_loop=None, interval=100):
-        self.io_loop = io_loop or ioloop.IOLoop.instance()
-        self.periodic_callback = ioloop.PeriodicCallback(
-                partial(self.on_time, self), interval, self.io_loop)
+class AsyncResult(celery.result.AsyncResult):
+    def __init__(self, task_id, status=None, traceback=None, result=None, **kwargs):
+        super(AsyncResult, self).__init__(task_id)
+        self._status = status
+        self._traceback = traceback
+        self._result = result
 
-    def task_complete(self, event):
-        self.io_loop.add_callback(partial(ApplyHandler.on_complete, event))
+    @property
+    def status(self):
+        return self._status or super(AsyncResult, self).status
+    state = status
 
-    def on_time(self, *args):
-        tasks = ApplyHandler.tasks
-        completed = filter(lambda task_id:tasks[task_id][0].ready(), tasks)
-        for task_id in completed:
-            ApplyHandler.on_complete(task_id)
+    @property
+    def traceback(self):
+        if self._result is not None:
+            return self._traceback
+        else:
+            return super(AsyncResult, self).traceback
 
-    def start(self):
-        self.periodic_callback.start()
-
+    @property
+    def result(self):
+        return self._result or super(AsyncResult, self).result
