@@ -81,12 +81,14 @@ class ApplyHandler(ApplyHandlerBase):
                          **options)
 
     def on_complete(self, htimeout, result):
+        if self._finished:
+            return
+        if htimeout:
+            ioloop.IOLoop.instance().remove_timeout(htimeout)
         response = {'task-id': result.task_id, 'state': result.state}
         if result.successful():
             response.update({'result': result.result})
         self.write(response)
-        if htimeout:
-            ioloop.IOLoop.instance().remove_timeout(htimeout)
         self.finish()
     
     def on_time(self, task_id):
