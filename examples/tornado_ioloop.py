@@ -1,15 +1,20 @@
+import time
+import tasks
+
+from functools import partial
 from tornado import ioloop
 
-from tcelery import Task
+import tcelery
+tcelery.setup_nonblocking_producer()
 
 
-def handle_request(response):
-    if response.error:
-        print "Error:", response.error
-    else:
-        print response.body
+def handle_result(result):
+    print(result.result)
     ioloop.IOLoop.instance().stop()
 
 
-Task("tasks.sleep", callback=handle_request)(3)
-ioloop.IOLoop.instance().start()
+io_loop = ioloop.IOLoop.instance()
+io_loop.add_timeout(time.time() + 1,
+                    partial(tasks.add.apply_async, args=[1, 2],
+                            callback=handle_result))
+io_loop.start()

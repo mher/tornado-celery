@@ -2,35 +2,39 @@ from tornado import gen
 from tornado import ioloop
 from tornado.web import asynchronous, RequestHandler, Application
 
-from tcelery import Task
+import tasks
+
+import tcelery
+tcelery.setup_nonblocking_producer()
 
 
 class AsyncHandler(RequestHandler):
     @asynchronous
     def get(self):
-        Task("tasks.sleep", callback=self.on_task_complete)(3)
+        tasks.sleep.apply_async(args=[3], callback=self.on_result)
 
-    def on_task_complete(self, response):
-        self.write("Completed!")
+    def on_result(self, response):
+        self.write(str(response.result))
         self.finish()
 
 
 class GenAsyncHandler(RequestHandler):
     @asynchronous
-    @gen.engine
+    @gen.coroutine
     def get(self):
-        response = yield Task("tasks.sleep", 3)
-        self.write(str(response.body))
+        response = yield gen.Task(tasks.sleep.apply_async, args=[3])
+        self.write(str(response.result))
         self.finish()
 
 
 class GenMultipleAsyncHandler(RequestHandler):
     @asynchronous
-    @gen.engine
+    @gen.coroutine
     def get(self):
-        r1, r2 = yield [Task("tasks.sleep", 3), Task("tasks.add", 1, 2)]
-        self.write(str(r1.body))
-        self.write(str(r2.body))
+        r1, r2 = yield [gen.Task(tasks.sleep.apply_async, args=[2]),
+                        gen.Task(tasks.add.apply_async, args=[1, 2])]
+        self.write(str(r1.result))
+        self.write(str(r2.result))
         self.finish()
 
 
