@@ -96,22 +96,6 @@ class TaskTests(TestCase):
         self.assertFalse(response.ok)
 
 
-class TaskStatusTests(TestCase):
-    def test_registered_tasks(self):
-        response, msg = self.get('/tasks/registered/')
-        self.assertTrue(response.ok)
-        tasks = ['tasks.add', 'tasks.echo']
-        self.assertTrue(all([t in msg.values()[0] for t in tasks]))
-
-    def test_active_tasks(self):
-        response, msg = self.get('/tasks/active/')
-        self.assertTrue(response.ok)
-
-    def test_scheduled_tesks(self):
-        response, msg = self.get('/tasks/scheduled/')
-        self.assertTrue(response.ok)
-
-
 class TimingTests(TestCase):
     def test_eta(self):
         response, msg = self.post('/apply/tasks.echo/',

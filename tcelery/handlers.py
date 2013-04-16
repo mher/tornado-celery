@@ -96,32 +96,8 @@ class ApplyHandler(ApplyHandlerBase):
         self.finish()
 
 
-@route('/tasks/registered/(.*)')
-class RegisteredTaskHandler(web.RequestHandler):
-    def get(self, host):
-        host = [host] if host else None
-        i = inspect(host)
-        self.write(i.registered())
-
-
-@route('/tasks/active/(.*)')
-class ActiveTaskHandler(web.RequestHandler):
-    def get(self, host):
-        host = [host] if host else None
-        i = inspect(host)
-        self.write(i.active())
-
-
-@route('/tasks/scheduled/(.*)')
-class ScheduledTaskHandler(web.RequestHandler):
-    def get(self, host):
-        host = [host] if host else None
-        i = inspect(host)
-        self.write(i.active())
-
-
 @route('/')
 class MainHandler(web.RequestHandler):
     def get(self):
         self.write("Tasks: ")
-        self.write(unicode(ApplyHandler.tasks))
+        self.write(unicode(self.application.celery_app.tasks.keys()))
