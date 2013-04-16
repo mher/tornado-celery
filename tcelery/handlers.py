@@ -100,4 +100,5 @@ class ApplyHandler(ApplyHandlerBase):
 class MainHandler(web.RequestHandler):
     def get(self):
         self.write("Tasks: ")
-        self.write(unicode(self.application.celery_app.tasks.keys()))
+        self.write(', '.join(filter(lambda x: not x.startswith('celery'),
+                             self.application.celery_app.tasks.keys())))
