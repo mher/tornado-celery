@@ -1,7 +1,7 @@
 Celery integration with Tornado
 ===============================
 
-tornado-celery is a non-blocking Celery client for Tornado web framework.
+tornado-celery is a non-blocking Celery client for Tornado web framework
 
 Usage
 -----
@@ -32,8 +32,7 @@ Calling tasks with generator-based interface: ::
             self.write(str(response.result))
             self.finish()
 
-.. NOTE::
-   Currently callbacks only work with AMQP backend
+**NOTE:** Currently callbacks only work with AMQP backend
 
 tornado-celery can be launched as a web server: ::
 
