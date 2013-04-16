@@ -26,7 +26,7 @@ class ApplyHandlerBase(web.RequestHandler):
         return args, kwargs, options
 
 
-@route('/async-apply/(.*)/')
+@route('/apply-async/(.*)/')
 class AsyncApplyHandler(ApplyHandlerBase):
     def post(self, taskname):
         try:

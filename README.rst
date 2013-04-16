@@ -40,7 +40,7 @@ tornado-celery can be launched as a web server: ::
 
 Execute a task asynchronously: ::
 
-    $ curl -X POST -d '{"args":["hello"]}' http://localhost:8888/async-apply/tasks.echo/
+    $ curl -X POST -d '{"args":["hello"]}' http://localhost:8888/apply-async/tasks.echo/
     {"task-id": "a24c9e38-4976-426a-83d6-6b10b4de7ab1", "state": "PENDING"}
 
 Get the result: ::

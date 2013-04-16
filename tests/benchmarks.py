@@ -13,7 +13,7 @@ from tornado import httpclient
 
 
 echo_url = "http://localhost:8888/apply/tasks.echo/"
-async_echo_url = "http://localhost:8888/async-apply/tasks.echo/"
+async_echo_url = "http://localhost:8888/apply-async/tasks.echo/"
 
 
 def _timeit_fetch(url, ntimes):
@@ -34,15 +34,15 @@ def bench_apply(ntimes):
     print("apply %d times: %ss" % _timeit_fetch(echo_url, ntimes))
 
 
-def bench_async_apply(ntimes):
-    print("async-apply %d times: %ss" % _timeit_fetch(async_echo_url, ntimes))
+def bench_apply_async(ntimes):
+    print("apply-async %d times: %ss" % _timeit_fetch(async_echo_url, ntimes))
 
 
-def bench_async_apply_with_requests(ntimes):
+def bench_apply_async_with_requests(ntimes):
     time_start = time.time()
     for i in range(ntimes):
         requests.post(async_echo_url, data={"args":"foo"})
-    print("async-apply-with-requests %d times: %ss" % (ntimes, time.time() - time_start))
+    print("apply-async-with-requests %d times: %ss" % (ntimes, time.time() - time_start))
 
 
 def bench_delay(ntimes):
@@ -60,6 +60,6 @@ if __name__=="__main__":
         vars()[method](ntimes)
     else:
         bench_delay(ntimes)
-        bench_async_apply_with_requests(ntimes)
-        bench_async_apply(ntimes)
+        bench_apply_async_with_requests(ntimes)
+        bench_apply_async(ntimes)
         bench_apply(ntimes)

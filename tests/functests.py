@@ -26,7 +26,7 @@ class TestCase(unittest.TestCase):
 
 class AsyncTaskTests(TestCase):
     def test_acync_apply(self):
-        response, msg = self.post('/async-apply/tasks.echo/',
+        response, msg = self.post('/apply-async/tasks.echo/',
                                   data={'args': ['foo']})
         self.assertTrue(response.ok)
         task_id =  msg['task-id']
@@ -38,8 +38,8 @@ class AsyncTaskTests(TestCase):
         self.assertEqual('SUCCESS', msg['state'])
         self.assertEqual("foo", msg['result'])
 
-    def test_async_apply_with_args(self):
-        response, msg = self.post('/async-apply/tasks.add/',
+    def test_apply_async_with_args(self):
+        response, msg = self.post('/apply-async/tasks.add/',
                                   data={'args': [1, 2]})
         self.assertTrue(response.ok)
         task_id =  msg['task-id']
@@ -51,8 +51,8 @@ class AsyncTaskTests(TestCase):
         self.assertEqual('SUCCESS', msg['state'])
         self.assertEqual(3, msg['result'])
 
-    def test_async_apply_with_kwargs(self):
-        response, msg = self.post('/async-apply/tasks.echo/',
+    def test_apply_async_with_kwargs(self):
+        response, msg = self.post('/apply-async/tasks.echo/',
                 data={'args': ['foo'], 'kwargs': {'timestamp':True}})
         self.assertTrue(response.ok)
         task_id =  msg['task-id']
@@ -65,7 +65,7 @@ class AsyncTaskTests(TestCase):
         self.assertTrue(msg['result'].endswith('foo'))
 
     def test_unknown_task(self):
-        response, msg = self.post('/async-apply/foo/')
+        response, msg = self.post('/apply-async/foo/')
         self.assertFalse(response.ok)
     
     @unittest.skip('no way to validate invalid task ids')
