@@ -26,7 +26,7 @@ setup(
     author='Mher Movsisyan',
     url='https://github.com/mher/tornado-celery',
     packages=find_packages(),
-    install_requires=['celery', 'tornado'],
+    install_requires=['celery', 'tornado', 'pika'],
     entry_points={
         'console_scripts': [
             'celeryr = tcelery.__main__:main',
