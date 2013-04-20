@@ -4,7 +4,8 @@ import celery
 
 from tornado import ioloop
 
-from .producer import NonBlockingTaskProducer, Connection
+from .connection import Connection
+from .producer import NonBlockingTaskProducer
 
 
 VERSION = (0, 2, 0)
@@ -21,6 +22,6 @@ def setup_nonblocking_producer(celery_app=None, io_loop=None, on_ready=None):
 
     def connect():
         broker_url = celery_app.connection().as_uri(include_password=True)
-        NonBlockingTaskProducer.producer.connect(broker_url, on_ready)
+        NonBlockingTaskProducer.connection.connect(broker_url, on_ready)
 
     io_loop.add_callback(connect)
