@@ -14,7 +14,7 @@ from pika.adapters.tornado_connection import TornadoConnection
 from .result import AsyncResult
 
 
-class PikaClient(object):
+class Connection(object):
 
     content_type = 'application/x-python-serialize'
 
@@ -82,7 +82,7 @@ class PikaClient(object):
 
 class AsyncTaskProducer(TaskProducer):
 
-    producer = None
+    connection = None
     app = None
 
     def __init__(self, *args, **kwargs):
@@ -111,7 +111,7 @@ class AsyncTaskProducer(TaskProducer):
             body, serializer, content_type, content_encoding,
             compression, headers)
 
-        publish = self.producer.publish
+        publish = self.connection.publish
         result = publish(body, priority=priority, content_type=content_type,
                        content_encoding=content_encoding, headers=headers,
                        properties=properties, routing_key=routing_key,
@@ -120,7 +120,7 @@ class AsyncTaskProducer(TaskProducer):
 
         if callback:
             x_expires = int(self.app.conf.CELERY_TASK_RESULT_EXPIRES.total_seconds()*1000)
-            self.producer.consume(task_id.replace('-', ''),
+            self.connection.consume(task_id.replace('-', ''),
                                   partial(self.on_result, callback),
                                   x_expires=x_expires)
 

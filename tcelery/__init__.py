@@ -4,7 +4,7 @@ import celery
 
 from tornado import ioloop
 
-from .producer import AsyncTaskProducer, PikaClient
+from .producer import AsyncTaskProducer, Connection
 
 
 VERSION = (0, 2, 0)
@@ -16,7 +16,7 @@ def setup_nonblocking_producer(celery_app=None, io_loop=None, on_ready=None):
     io_loop = io_loop or ioloop.IOLoop.instance()
 
     AsyncTaskProducer.app = celery_app
-    AsyncTaskProducer.producer = PikaClient()
+    AsyncTaskProducer.connection = Connection()
     celery.app.amqp.AMQP.producer_cls = AsyncTaskProducer
 
     def connect():
