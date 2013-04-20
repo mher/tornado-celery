@@ -29,7 +29,8 @@ class Connection(object):
         host = purl.hostname
         port = purl.port
 
-        params = pika.ConnectionParameters(host, port, virtual_host, credentials)
+        params = pika.ConnectionParameters(host, port, virtual_host,
+                                           credentials)
         self.connection = TornadoConnection(
                 params, on_open_callback=partial(self.on_connect, callback))
         self.connection.add_on_close_callback(self.on_closed)
@@ -60,9 +61,7 @@ class Connection(object):
         assert self.channel
         content_type = content_type or self.content_type
 
-        properties = pika.BasicProperties(
-                content_type=content_type,
-                )
+        properties = pika.BasicProperties(content_type=content_type)
 
         self.channel.basic_publish(
                 exchange=exchange, routing_key=routing_key, body=body,
@@ -72,8 +71,9 @@ class Connection(object):
     def consume(self, queue, callback, x_expires=None):
         assert self.channel
         self.channel.queue_declare(self.on_queue_declared, queue=queue,
-                exclusive=False, auto_delete=True, nowait=True,
-                arguments={'x-expires': x_expires})
+                                   exclusive=False, auto_delete=True,
+                                   nowait=True,
+                                   arguments={'x-expires': x_expires})
         self.channel.basic_consume(callback, queue, no_ack=True)
 
     def on_queue_declared(self, *args, **kwargs):
@@ -105,7 +105,8 @@ class NonBlockingTaskProducer(TaskProducer):
         if callback and not callable(callback):
             raise ValueError('callback should be callable')
         if callback and not isinstance(self.app.backend, AMQPBackend):
-            raise NotImplementedError('callback can be used only with AMQP backend')
+            raise NotImplementedError(
+                    'callback can be used only with AMQP backend')
 
         body, content_type, content_encoding = self._prepare(
             body, serializer, content_type, content_encoding,
@@ -113,16 +114,17 @@ class NonBlockingTaskProducer(TaskProducer):
 
         publish = self.connection.publish
         result = publish(body, priority=priority, content_type=content_type,
-                       content_encoding=content_encoding, headers=headers,
-                       properties=properties, routing_key=routing_key,
-                       mandatory=mandatory, immediate=immediate,
-                       exchange=exchange, declare=declare)
+                         content_encoding=content_encoding, headers=headers,
+                         properties=properties, routing_key=routing_key,
+                         mandatory=mandatory, immediate=immediate,
+                         exchange=exchange, declare=declare)
 
         if callback:
-            x_expires = int(self.app.conf.CELERY_TASK_RESULT_EXPIRES.total_seconds()*1000)
+            x_expires = self.app.conf.CELERY_TASK_RESULT_EXPIRES
+            x_expires = int(x_expires.total_seconds() * 1000)
             self.connection.consume(task_id.replace('-', ''),
-                                  partial(self.on_result, callback),
-                                  x_expires=x_expires)
+                                    partial(self.on_result, callback),
+                                    x_expires=x_expires)
 
         return result
 

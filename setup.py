@@ -7,6 +7,7 @@ from setuptools import setup, find_packages
 
 version = re.compile(r'VERSION\s*=\s*\((.*?)\)')
 
+
 def get_package_version():
     "returns package version without importing it"
     base = os.path.abspath(os.path.dirname(__file__))

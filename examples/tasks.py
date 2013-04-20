@@ -15,7 +15,7 @@ def add(x, y):
 @celery.task
 def sleep(seconds):
     time.sleep(float(seconds))
-    return seconds 
+    return seconds
 
 
 @celery.task

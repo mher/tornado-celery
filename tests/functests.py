@@ -29,7 +29,7 @@ class AsyncTaskTests(TestCase):
         response, msg = self.post('/apply-async/tasks.echo/',
                                   data={'args': ['foo']})
         self.assertTrue(response.ok)
-        task_id =  msg['task-id']
+        task_id = msg['task-id']
 
         time.sleep(0.25)
 
@@ -42,7 +42,7 @@ class AsyncTaskTests(TestCase):
         response, msg = self.post('/apply-async/tasks.add/',
                                   data={'args': [1, 2]})
         self.assertTrue(response.ok)
-        task_id =  msg['task-id']
+        task_id = msg['task-id']
 
         time.sleep(0.25)
 
@@ -53,9 +53,10 @@ class AsyncTaskTests(TestCase):
 
     def test_apply_async_with_kwargs(self):
         response, msg = self.post('/apply-async/tasks.echo/',
-                data={'args': ['foo'], 'kwargs': {'timestamp':True}})
+                                  data={'args': ['foo'],
+                                        'kwargs': {'timestamp': True}})
         self.assertTrue(response.ok)
-        task_id =  msg['task-id']
+        task_id = msg['task-id']
 
         time.sleep(0.25)
 
@@ -67,7 +68,7 @@ class AsyncTaskTests(TestCase):
     def test_unknown_task(self):
         response, msg = self.post('/apply-async/foo/')
         self.assertFalse(response.ok)
-    
+
     @unittest.skip('no way to validate invalid task ids')
     def test_unknown_task_status(self):
         response, msg = self.get('/tasks/result/%s/' % 'foo')
@@ -105,9 +106,9 @@ class TimingTests(TestCase):
         self.assertFalse('result' in msg)
 
     def test_expires(self):
-        response, msg= self.post('/apply/tasks.echo/',
-                                 data={'args': ['foo'],
-                                       'countdown': 5, 'expires': 1})
+        response, msg = self.post('/apply/tasks.echo/',
+                                  data={'args': ['foo'],
+                                        'countdown': 5, 'expires': 1})
         self.assertTrue(response.ok)
         self.assertEqual('REVOKED', msg['state'])
         self.assertFalse('result' in msg)
@@ -125,14 +126,14 @@ class TaskClassTests(unittest.TestCase):
         def done(response):
             ioloop.IOLoop.instance().stop()
             self.assertEqual(3, json_decode(response.body)["result"])
-        yield gen.Task(tasks.add.apply_async, args=[1,2], callback=done)
+        yield gen.Task(tasks.add.apply_async, args=[1, 2], callback=done)
         ioloop.IOLoop.instance().start()
-
 
     def test_async_with_kwargs(self):
         def done(response):
             ioloop.IOLoop.instance().stop()
-            self.assertTrue(json_decode(response.body)["result"].endswith("hello"))
+            result = json_decode(response.body)["result"]
+            self.assertTrue(result.endswith("hello"))
         yield gen.Task(tasks.echo, args=['hello'], kwargs={'timestamp': True},
                        callback=done)
         ioloop.IOLoop.instance().start()

@@ -5,7 +5,8 @@ import celery
 
 
 class AsyncResult(celery.result.AsyncResult):
-    def __init__(self, task_id, status=None, traceback=None, result=None, **kwargs):
+    def __init__(self, task_id, status=None, traceback=None, result=None,
+                 **kwargs):
         super(AsyncResult, self).__init__(task_id)
         self._status = status
         self._traceback = traceback

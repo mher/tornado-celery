@@ -9,7 +9,6 @@ from tornado import ioloop
 from tornado.escape import json_decode
 
 from celery.result import AsyncResult
-from celery.task.control import inspect
 from celery.task.control import revoke
 from celery.utils import uuid
 
@@ -45,7 +44,7 @@ class TaskResultHandler(web.RequestHandler):
         result = AsyncResult(task_id, app=self.application.celery_app)
         response = {'task-id': task_id, 'state': result.state}
         if result.ready():
-            response.update({'result': result.result}) 
+            response.update({'result': result.result})
         self.write(response)
 
 
@@ -90,7 +89,7 @@ class ApplyHandler(ApplyHandlerBase):
             response.update({'result': result.result})
         self.write(response)
         self.finish()
-    
+
     def on_time(self, task_id):
         revoke(task_id)
         result = AsyncResult(task_id, app=self.application.celery_app)
