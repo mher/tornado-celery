@@ -80,13 +80,13 @@ class Connection(object):
         pass
 
 
-class AsyncTaskProducer(TaskProducer):
+class NonBlockingTaskProducer(TaskProducer):
 
     connection = None
     app = None
 
     def __init__(self, *args, **kwargs):
-        super(AsyncTaskProducer, self).__init__(*args, **kwargs)
+        super(NonBlockingTaskProducer, self).__init__(*args, **kwargs)
 
     def publish(self, body, routing_key=None, delivery_mode=None,
                 mandatory=False, immediate=False, priority=0,
