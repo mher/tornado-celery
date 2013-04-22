@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from urlparse import urlparse
 from functools import partial
+from itertools import cycle
 
 import pika
 
@@ -72,3 +73,26 @@ class Connection(object):
 
     def on_queue_declared(self, *args, **kwargs):
         pass
+
+
+class ConnectionPool(object):
+    def __init__(self, limit):
+        self._limit = limit
+        self._connections = []
+        self._connection = None
+
+    def connect(self, broker_url, callback):
+        self._on_ready = callback
+        for _ in range(self._limit):
+            conn = Connection()
+            conn.connect(broker_url, partial(self._on_connect, conn))
+
+    def _on_connect(self, connection):
+        self._connections.append(connection)
+        if len(self._connections) == self._limit:
+            self._connection = cycle(self._connections)
+            self._on_ready()
+
+    def connection(self):
+        assert self._connection is not None
+        return self._connection.next()

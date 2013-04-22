@@ -12,11 +12,12 @@ from .result import AsyncResult
 
 class NonBlockingTaskProducer(TaskProducer):
 
-    connection = None
+    conn_pool = None
     app = None
 
-    def __init__(self, *args, **kwargs):
-        super(NonBlockingTaskProducer, self).__init__(*args, **kwargs)
+    def __init__(self, channel=None, *args, **kwargs):
+        super(NonBlockingTaskProducer, self).__init__(
+                channel, *args, **kwargs)
 
     def publish(self, body, routing_key=None, delivery_mode=None,
                 mandatory=False, immediate=False, priority=0,
@@ -42,7 +43,8 @@ class NonBlockingTaskProducer(TaskProducer):
             body, serializer, content_type, content_encoding,
             compression, headers)
 
-        publish = self.connection.publish
+        conn = self.conn_pool.connection()
+        publish = conn.publish
         result = publish(body, priority=priority, content_type=content_type,
                          content_encoding=content_encoding, headers=headers,
                          properties=properties, routing_key=routing_key,
@@ -52,12 +54,14 @@ class NonBlockingTaskProducer(TaskProducer):
         if callback:
             x_expires = self.app.conf.CELERY_TASK_RESULT_EXPIRES
             x_expires = int(x_expires.total_seconds() * 1000)
-            self.connection.consume(task_id.replace('-', ''),
-                                    partial(self.on_result, callback),
-                                    x_expires=x_expires)
-
+            conn.consume(task_id.replace('-', ''),
+                         partial(self.on_result, callback),
+                         x_expires=x_expires)
         return result
 
     def on_result(self, callback, method, channel, deliver, reply):
         reply = pickle.loads(reply)
         callback(AsyncResult(**reply))
+
+    def __repr__(self):
+        return '<NonBlockingTaskProducer: {0.channel}>'.format(self)
