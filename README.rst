@@ -61,7 +61,7 @@ Execute a task with timeout: ::
 Installation
 ------------
 
-To install tornado-celery, simply: ::
+To install, simply: ::
 
-    $ pip install git+git://github.com/mher/tornado-celery.git
+    $ pip install tornado-celery
 
