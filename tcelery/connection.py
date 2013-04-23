@@ -81,7 +81,7 @@ class ConnectionPool(object):
         self._connections = []
         self._connection = None
 
-    def connect(self, broker_url, callback):
+    def connect(self, broker_url, callback=None):
         self._on_ready = callback
         for _ in range(self._limit):
             conn = Connection()
@@ -91,7 +91,8 @@ class ConnectionPool(object):
         self._connections.append(connection)
         if len(self._connections) == self._limit:
             self._connection = cycle(self._connections)
-            self._on_ready()
+            if self._on_ready:
+                self._on_ready()
 
     def connection(self):
         assert self._connection is not None
