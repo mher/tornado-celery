@@ -20,17 +20,19 @@ def get_package_version():
 
 
 setup(
-    name='tcelery',
+    name='tornado-celery',
     version=get_package_version(),
     description='Celery integration with Tornado',
     long_description=open('README.rst').read(),
     author='Mher Movsisyan',
+    author_email='mher.movsisyan@gmail.com',
     url='https://github.com/mher/tornado-celery',
+    license='BSD',
     packages=find_packages(),
     install_requires=['celery', 'tornado', 'pika'],
     entry_points={
         'console_scripts': [
-            'celeryr = tcelery.__main__:main',
+            'tcelery = tcelery.__main__:main',
         ]
     },
 )
