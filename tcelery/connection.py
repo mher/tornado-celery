@@ -17,15 +17,19 @@ class Connection(object):
         self.channel = None
         self.connection = None
 
-    def connect(self, url, callback=None):
+    def connect(self, url, options=None, callback=None):
         purl = urlparse(url)
         credentials = pika.PlainCredentials(purl.username, purl.password)
         virtual_host = purl.path[1:]
         host = purl.hostname
         port = purl.port
 
-        params = pika.ConnectionParameters(host, port, virtual_host,
-                                           credentials)
+        options = options or {}
+        options = {k.lstrip('DEFAULT_').lower(): v for k, v in options.items()}
+        options.update(host=host, port=port, virtual_host=virtual_host,
+                       credentials=credentials)
+
+        params = pika.ConnectionParameters(**options)
         self.connection = TornadoConnection(
                 params, on_open_callback=partial(self.on_connect, callback))
         self.connection.add_on_close_callback(self.on_closed)
@@ -81,11 +85,12 @@ class ConnectionPool(object):
         self._connections = []
         self._connection = None
 
-    def connect(self, broker_url, callback=None):
+    def connect(self, broker_url, options=None, callback=None):
         self._on_ready = callback
         for _ in range(self._limit):
             conn = Connection()
-            conn.connect(broker_url, partial(self._on_connect, conn))
+            conn.connect(broker_url, options=options,
+                         callback=partial(self._on_connect, conn))
 
     def _on_connect(self, connection):
         self._connections.append(connection)

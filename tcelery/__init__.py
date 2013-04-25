@@ -23,6 +23,9 @@ def setup_nonblocking_producer(celery_app=None, io_loop=None,
 
     def connect():
         broker_url = celery_app.connection().as_uri(include_password=True)
-        NonBlockingTaskProducer.conn_pool.connect(broker_url, on_ready)
+        options = celery_app.conf.get('CELERYT_PIKA_OPTIONS', {})
+        NonBlockingTaskProducer.conn_pool.connect(broker_url,
+                                                  options=options,
+                                                  callback=on_ready)
 
     io_loop.add_callback(connect)
