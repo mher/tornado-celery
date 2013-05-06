@@ -25,7 +25,7 @@ class Connection(object):
         port = purl.port
 
         options = options or {}
-        options = {k.lstrip('DEFAULT_').lower(): v for k, v in options.items()}
+        options = dict([(k.lstrip('DEFAULT_').lower(), v) for k, v in options.items()])
         options.update(host=host, port=port, virtual_host=virtual_host,
                        credentials=credentials)
 
