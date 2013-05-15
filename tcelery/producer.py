@@ -1,11 +1,13 @@
 from __future__ import absolute_import
 
 import pickle
+import timedelta
 
 from functools import partial
 
 from celery.app.amqp import TaskProducer
 from celery.backends.amqp import AMQPBackend
+from celery.utils import timeutils
 
 from .result import AsyncResult
 
@@ -52,16 +54,23 @@ class NonBlockingTaskProducer(TaskProducer):
                          exchange=exchange, declare=declare)
 
         if callback:
-            x_expires = self.app.conf.CELERY_TASK_RESULT_EXPIRES
-            x_expires = int(x_expires.total_seconds() * 1000)
             conn.consume(task_id.replace('-', ''),
                          partial(self.on_result, callback),
-                         x_expires=x_expires)
+                         x_expires=self.prepare_expires(type=int))
         return result
 
     def on_result(self, callback, method, channel, deliver, reply):
         reply = pickle.loads(reply)
         callback(AsyncResult(**reply))
+
+    def prepare_expires(self, value, type=None):
+        if value is None:
+            value = self.app.conf.CELERY_TASK_RESULT_EXPIRES
+        if isinstance(value, timedelta):
+            value = timeutils.timedelta_seconds(value)
+        if value is not None and type:
+            return type(value)
+        return value
 
     def __repr__(self):
         return '<NonBlockingTaskProducer: {0.channel}>'.format(self)
