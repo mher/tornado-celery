@@ -65,9 +65,9 @@ class NonBlockingTaskProducer(TaskProducer):
 
     def prepare_expires(self, value=None, type=None):
         if value is None:
-            value = self.app.conf.CELERY_TASK_RESULT_EXPIRES * 1000
+            value = self.app.conf.CELERY_TASK_RESULT_EXPIRES
         if isinstance(value, timedelta):
-            value = timeutils.timedelta_seconds(value)
+            value = timeutils.timedelta_seconds(value) * 1000
         if value is not None and type:
             return type(value)
         return value
