@@ -63,7 +63,7 @@ class NonBlockingTaskProducer(TaskProducer):
         reply = pickle.loads(reply)
         callback(AsyncResult(**reply))
 
-    def prepare_expires(self, value, type=None):
+    def prepare_expires(self, value=None, type=None):
         if value is None:
             value = self.app.conf.CELERY_TASK_RESULT_EXPIRES
         if isinstance(value, timedelta):
