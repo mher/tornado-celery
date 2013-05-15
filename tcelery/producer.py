@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
 import pickle
-import timedelta
 
 from functools import partial
+from datetime import timedelta
 
 from celery.app.amqp import TaskProducer
 from celery.backends.amqp import AMQPBackend
