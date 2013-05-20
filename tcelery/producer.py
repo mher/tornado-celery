@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
-import pickle
-
 from functools import partial
 from datetime import timedelta
+
+from kombu import serialization
 
 from celery.app.amqp import TaskProducer
 from celery.backends.amqp import AMQPBackend
@@ -11,6 +11,7 @@ from celery.utils import timeutils
 
 from .result import AsyncResult
 
+is_py3k = sys.version_info >= (3, 0)
 
 class NonBlockingTaskProducer(TaskProducer):
 
@@ -45,6 +46,12 @@ class NonBlockingTaskProducer(TaskProducer):
             body, serializer, content_type, content_encoding,
             compression, headers)
 
+        self.serializer = self.app.backend.serializer
+
+        (self.content_type,
+         self.content_encoding,
+         self.encoder) = serialization.registry._encoders[self.serializer]
+
         conn = self.conn_pool.connection()
         publish = conn.publish
         result = publish(body, priority=priority, content_type=content_type,
@@ -59,8 +66,14 @@ class NonBlockingTaskProducer(TaskProducer):
                          x_expires=self.prepare_expires(type=int))
         return result
 
+    def decode(self, payload):
+        payload = is_py3k and payload or str(payload)
+        return serialization.decode(payload,
+                                    content_type=self.content_type,
+                                    content_encoding=self.content_encoding)
+
     def on_result(self, callback, method, channel, deliver, reply):
-        reply = pickle.loads(reply)
+        reply = self.decode(reply)
         callback(AsyncResult(**reply))
 
     def prepare_expires(self, value=None, type=None):
