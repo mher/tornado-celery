@@ -6,19 +6,21 @@ from tornado import ioloop
 
 from .connection import ConnectionPool
 from .producer import NonBlockingTaskProducer
-
+from .result import AsyncResult
 
 VERSION = (0, 2, 1)
 __version__ = '.'.join(map(str, VERSION))
 
 
 def setup_nonblocking_producer(celery_app=None, io_loop=None,
-                               on_ready=None, limit=1):
+                               on_ready=None, result_cls=AsyncResult,
+                               limit=1):
     celery_app = celery_app or celery.current_app
     io_loop = io_loop or ioloop.IOLoop.instance()
 
     NonBlockingTaskProducer.app = celery_app
     NonBlockingTaskProducer.conn_pool = ConnectionPool(limit=limit)
+    NonBlockingTaskProducer.result_cls = result_cls
     celery.app.amqp.AMQP.producer_cls = NonBlockingTaskProducer
 
     def connect():
