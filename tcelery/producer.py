@@ -17,6 +17,7 @@ class NonBlockingTaskProducer(TaskProducer):
 
     conn_pool = None
     app = None
+    result_cls = AsyncResult
 
     def __init__(self, channel=None, *args, **kwargs):
         super(NonBlockingTaskProducer, self).__init__(
@@ -74,7 +75,7 @@ class NonBlockingTaskProducer(TaskProducer):
 
     def on_result(self, callback, method, channel, deliver, reply):
         reply = self.decode(reply)
-        callback(AsyncResult(**reply))
+        callback(self.result_cls(**reply))
 
     def prepare_expires(self, value=None, type=None):
         if value is None:
