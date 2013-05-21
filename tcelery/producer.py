@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import sys
+
 from functools import partial
 from datetime import timedelta
 
@@ -12,6 +14,7 @@ from celery.utils import timeutils
 from .result import AsyncResult
 
 is_py3k = sys.version_info >= (3, 0)
+
 
 class NonBlockingTaskProducer(TaskProducer):
 
