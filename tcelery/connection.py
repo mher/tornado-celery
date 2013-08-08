@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from urlparse import urlparse
 from functools import partial
 from itertools import cycle
+from datetime import timedelta
 
 import pika
 import logging
@@ -10,15 +11,18 @@ import logging
 from pika.adapters.tornado_connection import TornadoConnection
 from pika.exceptions import AMQPConnectionError
 
+from tornado import ioloop
+
 
 class Connection(object):
 
     content_type = 'application/x-python-serialize'
 
-    def __init__(self):
+    def __init__(self, io_loop=None):
         self.channel = None
         self.connection = None
         self.url = None
+        self.io_loop = io_loop or ioloop.IOLoop.instance()
 
     def connect(self, url=None, options=None, callback=None):
         if url is not None:
@@ -37,11 +41,14 @@ class Connection(object):
         params = pika.ConnectionParameters(**options)
         try:
             TornadoConnection(params, stop_ioloop_on_close=False,
-                              on_open_callback=partial(self.on_connect, callback))
+                              on_open_callback=partial(self.on_connect, callback),
+                              custom_ioloop=self.io_loop)
         except AMQPConnectionError:
             logging.info('Retrying to connect in 2 seconds')
-            self.connection.add_timeout(2, partial(self.connect, url=url,
-                                                   options=options, callback=callback))
+            self.io_loop.add_timeout(
+                    timedelta(seconds=2),
+                    partial(self.connect, url=url,
+                            options=options, callback=callback))
 
     def on_connect(self, callback, connection):
         self.connection = connection
@@ -101,15 +108,16 @@ class Connection(object):
 
 
 class ConnectionPool(object):
-    def __init__(self, limit):
+    def __init__(self, limit, io_loop=None):
         self._limit = limit
         self._connections = []
         self._connection = None
+        self.io_loop = io_loop
 
     def connect(self, broker_url, options=None, callback=None):
         self._on_ready = callback
         for _ in range(self._limit):
-            conn = Connection()
+            conn = Connection(io_loop=self.io_loop)
             conn.connect(broker_url, options=options,
                          callback=partial(self._on_connect, conn))
 
