@@ -12,9 +12,11 @@ from tornado.options import options, define, parse_command_line
 
 from .app import Application
 from . import setup_nonblocking_producer
+from celery.loaders.base import BaseLoader
 
 
-define("port", default=8888, type=bool, help="run on the given port")
+define("port", default=8888, type=int, help="run on the given port")
+define("address", default='127.0.0.1', type=str, help="the bind address")
 
 
 class TCeleryCommand(Command):
@@ -26,6 +28,10 @@ class TCeleryCommand(Command):
         logging.info("Starting http server on port %s..." % options.port)
         http_server = httpserver.HTTPServer(Application(celery_app=self.app))
         http_server.listen(options.port)
+
+        bloader = BaseLoader()
+        bloader.import_default_modules()
+
         logging.info("Registered tasks:")
         logging.info(pformat(self.app.tasks.keys()))
 
