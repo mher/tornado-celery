@@ -27,7 +27,7 @@ class TCeleryCommand(Command):
 
         logging.info("Starting http server on port %s..." % options.port)
         http_server = httpserver.HTTPServer(Application(celery_app=self.app))
-        http_server.listen(options.port)
+        http_server.listen(options.port, options.address)
 
         bloader = BaseLoader()
         bloader.import_default_modules()
