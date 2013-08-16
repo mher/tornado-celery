@@ -36,7 +36,7 @@ Calling tasks with generator-based interface: ::
 
 tornado-celery can be launched as a web server: ::
 
-    $ python -m tcelery --port=8888
+    $ python -m tcelery --port=8888 --app=proj.celery:celery --address=0.0.0.0
 
 Execute a task asynchronously: ::
 
