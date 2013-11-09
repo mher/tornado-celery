@@ -65,3 +65,9 @@ To install, simply: ::
 
     $ pip install tornado-celery
 
+
+
+.. image:: https://d2weczhvl823v0.cloudfront.net/mher/tornado-celery/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
+
