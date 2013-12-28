@@ -99,7 +99,7 @@ class Connection(object):
         assert self.channel
         self.channel.queue_declare(self.on_queue_declared, queue=queue,
                                    exclusive=False, auto_delete=True,
-                                   nowait=True,
+                                   nowait=True, durable=True,
                                    arguments={'x-expires': x_expires})
         self.channel.basic_consume(callback, queue, no_ack=True)
 
