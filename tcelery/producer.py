@@ -52,6 +52,8 @@ class NonBlockingTaskProducer(TaskProducer):
 
         self.serializer = self.app.backend.serializer
 
+        serialization.registry.enable(serializer)
+
         (self.content_type,
          self.content_encoding,
          self.encoder) = serialization.registry._encoders[self.serializer]
