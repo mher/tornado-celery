@@ -19,7 +19,7 @@ def setup_nonblocking_producer(celery_app=None, io_loop=None,
     io_loop = io_loop or ioloop.IOLoop.instance()
 
     NonBlockingTaskProducer.app = celery_app
-    NonBlockingTaskProducer.conn_pool = ConnectionPool(limit=limit)
+    NonBlockingTaskProducer.conn_pool = ConnectionPool(limit, io_loop)
     NonBlockingTaskProducer.result_cls = result_cls
     if celery_app.conf['BROKER_URL'] and celery_app.conf['BROKER_URL'].startswith('amqp'):
         celery.app.amqp.AMQP.producer_cls = NonBlockingTaskProducer
