@@ -36,11 +36,12 @@ Calling tasks with generator-based interface: ::
 
 tornado-celery can be launched as a web server: ::
 
-    $ python -m tcelery --port=8888 --app=proj.celery:celery --address=0.0.0.0
+    $ cd tornado-celery
+    $ python -m tcelery --port=8888 --app=examples.tasks --address=0.0.0.0
 
 Execute a task asynchronously: ::
 
-    $ curl -X POST -d '{"args":["hello"]}' http://localhost:8888/apply-async/tasks.echo/
+    $ curl -X POST -d '{"args":["hello"]}' http://localhost:8888/apply-async/examples.tasks.echo/
     {"task-id": "a24c9e38-4976-426a-83d6-6b10b4de7ab1", "state": "PENDING"}
 
 Get the result: ::
@@ -50,12 +51,12 @@ Get the result: ::
 
 Execute a task and get the result: ::
 
-    $ curl -X POST -d '{"args":[1,2]}' http://localhost:8888/apply/tasks.add/
+    $ curl -X POST -d '{"args":[1,2]}' http://localhost:8888/apply/examples.tasks.add/
     {"task-id": "fe3cc5a5-d11b-4b17-a6e2-e7fd2fba7ec6", "state": "SUCCESS", "result": 3}
 
 Execute a task with timeout: ::
 
-    $ curl -X POST -d '{"args":[5],"timeout":1}' http://localhost:8888/apply/tasks.sleep/
+    $ curl -X POST -d '{"args":[5],"timeout":1}' http://localhost:8888/apply/examples.tasks.sleep/
     {"task-id": "9ca78e26-bbb2-404c-b3bb-bc1c63cbdf41", "state": "REVOKED"}
 
 Installation
@@ -64,8 +65,6 @@ Installation
 To install, simply: ::
 
     $ pip install tornado-celery
-
-
 
 .. image:: https://d2weczhvl823v0.cloudfront.net/mher/tornado-celery/trend.png
    :alt: Bitdeli badge
