@@ -29,7 +29,7 @@ class TCeleryCommand(Command):
         http_server = httpserver.HTTPServer(Application(celery_app=self.app))
         http_server.listen(options.port, options.address)
 
-        bloader = BaseLoader()
+        bloader = BaseLoader(self.app)
         bloader.import_default_modules()
 
         logging.info("Registered tasks:")
