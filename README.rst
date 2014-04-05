@@ -5,6 +5,9 @@ Celery integration with Tornado
         :target: http://badge.fury.io/py/tornado-celery
 .. image:: https://pypip.in/d/tornado-celery/badge.png
         :target: https://crate.io/packages/tornado-celery/
+.. image:: https://d2weczhvl823v0.cloudfront.net/mher/tornado-celery/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
 
 tornado-celery is a non-blocking Celery client for Tornado web framework
 
@@ -70,8 +73,4 @@ Installation
 To install, simply: ::
 
     $ pip install tornado-celery
-
-.. image:: https://d2weczhvl823v0.cloudfront.net/mher/tornado-celery/trend.png
-   :alt: Bitdeli badge
-   :target: https://bitdeli.com/free
 
