@@ -28,7 +28,7 @@ setup(
     author_email='mher.movsisyan@gmail.com',
     url='https://github.com/mher/tornado-celery',
     license='BSD',
-    packages=find_packages(),
+    packages=find_packages(exclude=["examples.*", "tests.*"]),
     install_requires=['celery', 'tornado', 'pika'],
     entry_points={
         'console_scripts': [
