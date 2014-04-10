@@ -86,7 +86,10 @@ class ApplyHandler(ApplyHandlerBase):
             ioloop.IOLoop.instance().remove_timeout(htimeout)
         response = {'task-id': result.task_id, 'state': result.state}
         if result.successful():
-            response.update({'result': result.result})
+            response['result'] = result.result
+        else:
+            response['traceback'] = result.traceback
+            response['error'] = result.result
         self.write(response)
         self.finish()
 
