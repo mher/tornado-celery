@@ -44,7 +44,11 @@ class TaskResultHandler(web.RequestHandler):
         result = AsyncResult(task_id, app=self.application.celery_app)
         response = {'task-id': task_id, 'state': result.state}
         if result.ready():
-            response.update({'result': result.result})
+            if response.successful():
+                response['result'] = result.result
+            else:
+                response['traceback'] = result.traceback
+                response['error'] = result.result
         self.write(response)
 
 
