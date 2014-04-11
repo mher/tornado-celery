@@ -1,5 +1,5 @@
-from __future__ import absolute_import
-from __future__ import with_statement
+
+
 
 from datetime import timedelta
 from functools import partial
@@ -101,5 +101,4 @@ class ApplyHandler(ApplyHandlerBase):
 class MainHandler(web.RequestHandler):
     def get(self):
         self.write("Tasks: ")
-        self.write(', '.join(filter(lambda x: not x.startswith('celery'),
-                             self.application.celery_app.tasks.keys())))
+        self.write(', '.join([x for x in list(self.application.celery_app.tasks.keys()) if not x.startswith('celery')]))

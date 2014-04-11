@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import sys
 
@@ -12,6 +12,7 @@ from celery.backends.amqp import AMQPBackend
 from celery.utils import timeutils
 
 from .result import AsyncResult
+import collections
 
 is_py3k = sys.version_info >= (3, 0)
 
@@ -40,7 +41,7 @@ class NonBlockingTaskProducer(TaskProducer):
         callback = properties.pop('callback', None)
         task_id = body['id']
 
-        if callback and not callable(callback):
+        if callback and not isinstance(callback, collections.Callable):
             raise ValueError('callback should be callable')
         if callback and not isinstance(self.app.backend, AMQPBackend):
             raise NotImplementedError(

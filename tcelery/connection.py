@@ -1,6 +1,7 @@
-from __future__ import absolute_import
-
-from urlparse import urlparse
+try:
+    from urlparse import urlparse
+except ImportError: # py3k
+    from urllib.parse import urlparse
 from functools import partial
 from itertools import cycle
 from datetime import timedelta
@@ -34,7 +35,7 @@ class Connection(object):
         port = purl.port
 
         options = options or {}
-        options = dict([(k.lstrip('DEFAULT_').lower(), v) for k, v in options.items()])
+        options = dict([(k.lstrip('DEFAULT_').lower(), v) for k, v in list(options.items())])
         options.update(host=host, port=port, virtual_host=virtual_host,
                        credentials=credentials)
 
@@ -130,4 +131,4 @@ class ConnectionPool(object):
 
     def connection(self):
         assert self._connection is not None
-        return self._connection.next()
+        return next(self._connection)
