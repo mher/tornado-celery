@@ -12,7 +12,6 @@ from celery.backends.amqp import AMQPBackend
 from celery.utils import timeutils
 
 from .result import AsyncResult
-import collections
 
 is_py3k = sys.version_info >= (3, 0)
 
