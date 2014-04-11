@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import sys
 import re
 
 from setuptools import setup, find_packages
@@ -18,6 +19,16 @@ def get_package_version():
                 continue
             return ".".join(m.groups()[0].split(", "))
 
+install_requires = ['celery', 'tornado']
+dependency_links = []
+
+if sys.version_info[0] >= 3:
+    dependency_links.append(
+        'https://github.com/renshawbay/pika-python3/archive/python3.zip#egg=pika-python3'
+    )
+    install_requires.append('pika-python3')
+else:
+    install_requires.append('pika')
 
 setup(
     name='tornado-celery',
@@ -29,7 +40,8 @@ setup(
     url='https://github.com/mher/tornado-celery',
     license='BSD',
     packages=find_packages(),
-    install_requires=['celery', 'tornado', 'pika'],
+    install_requires=install_requires,
+    dependency_links=dependency_links,
     entry_points={
         'console_scripts': [
             'tcelery = tcelery.__main__:main',
