@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 try:
     from urlparse import urlparse
 except ImportError: # py3k
@@ -35,7 +37,7 @@ class Connection(object):
         port = purl.port
 
         options = options or {}
-        options = dict([(k.lstrip('DEFAULT_').lower(), v) for k, v in list(options.items())])
+        options = dict([(k.lstrip('DEFAULT_').lower(), v) for k, v in options.items()])
         options.update(host=host, port=port, virtual_host=virtual_host,
                        credentials=credentials)
 

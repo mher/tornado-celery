@@ -1,4 +1,4 @@
-
+from __future__ import absolute_import
 
 import sys
 
@@ -41,7 +41,7 @@ class NonBlockingTaskProducer(TaskProducer):
         callback = properties.pop('callback', None)
         task_id = body['id']
 
-        if callback and not isinstance(callback, collections.Callable):
+        if callback and not callable(callback):
             raise ValueError('callback should be callable')
         if callback and not isinstance(self.app.backend, AMQPBackend):
             raise NotImplementedError(
