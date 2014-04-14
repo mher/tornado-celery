@@ -22,7 +22,7 @@ define("address", default='127.0.0.1', type=str, help="the bind address")
 class TCeleryCommand(Command):
 
     def run_from_argv(self, prog_name, argv=None):
-        argv = filter(self.tornado_option, argv)
+        argv = list(filter(self.tornado_option, argv))
         parse_command_line([prog_name] + argv)
 
         logging.info("Starting http server on port %s..." % options.port)
@@ -33,7 +33,7 @@ class TCeleryCommand(Command):
         bloader.import_default_modules()
 
         logging.info("Registered tasks:")
-        logging.info(pformat(self.app.tasks.keys()))
+        logging.info(pformat(list(self.app.tasks.keys())))
 
         logging.info("Setting up non-blocking producer...")
         setup_nonblocking_producer()

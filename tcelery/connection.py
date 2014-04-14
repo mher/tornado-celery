@@ -1,6 +1,9 @@
 from __future__ import absolute_import
 
-from urlparse import urlparse
+try:
+    from urlparse import urlparse
+except ImportError: # py3k
+    from urllib.parse import urlparse
 from functools import partial
 from itertools import cycle
 from datetime import timedelta
@@ -130,4 +133,4 @@ class ConnectionPool(object):
 
     def connection(self):
         assert self._connection is not None
-        return self._connection.next()
+        return next(self._connection)
