@@ -39,8 +39,7 @@ setup(
     author_email='mher.movsisyan@gmail.com',
     url='https://github.com/mher/tornado-celery',
     license='BSD',
-    packages=find_packages(),
-    install_requires=install_requires,
+    packages=['tcelery'],
     dependency_links=dependency_links,
     entry_points={
         'console_scripts': [
