@@ -74,3 +74,9 @@ To install, simply: ::
 
     $ pip install tornado-celery
 
+Documentation
+-------------
+
+Documentation is available at `Read the Docs`_
+
+.. _Read the Docs: http://tornado-celery.readthedocs.org
