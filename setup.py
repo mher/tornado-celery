@@ -30,6 +30,25 @@ if sys.version_info[0] >= 3:
 else:
     install_requires.append('pika')
 
+
+classes = """
+    Development Status :: 3 - Alpha
+    Intended Audience :: Developers
+    License :: OSI Approved :: BSD License
+    Topic :: System :: Distributed Computing
+    Programming Language :: Python
+    Programming Language :: Python :: 2
+    Programming Language :: Python :: 2.6
+    Programming Language :: Python :: 2.7
+    Programming Language :: Python :: 3
+    Programming Language :: Python :: 3.2
+    Programming Language :: Python :: 3.3
+    Programming Language :: Python :: Implementation :: CPython
+    Operating System :: OS Independent
+"""
+classifiers = [s.strip() for s in classes.split('\n') if s]
+
+
 setup(
     name='tornado-celery',
     version=get_package_version(),
@@ -39,7 +58,8 @@ setup(
     author_email='mher.movsisyan@gmail.com',
     url='https://github.com/mher/tornado-celery',
     license='BSD',
-    packages=['tcelery'],
+    classifiers=classifiers,
+    packages=find_packages(exclude=['tests', 'tests.*']),
     dependency_links=dependency_links,
     entry_points={
         'console_scripts': [
