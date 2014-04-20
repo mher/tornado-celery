@@ -1,0 +1,6 @@
+Sphinx
+sphinxcontrib-fulltoc
+sphinxcontrib-httpdomain
+tornado
+celery
+pika
