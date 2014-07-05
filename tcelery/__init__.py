@@ -8,8 +8,8 @@ from .connection import ConnectionPool
 from .producer import NonBlockingTaskProducer
 from .result import AsyncResult
 
-VERSION = (0, 3, 3)
-__version__ = '.'.join(map(str, VERSION))
+VERSION = (0, 3, 4)
+__version__ = '.'.join(map(str, VERSION)) + '-dev'
 
 
 def setup_nonblocking_producer(celery_app=None, io_loop=None,
