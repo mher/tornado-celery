@@ -61,6 +61,7 @@ setup(
     classifiers=classifiers,
     packages=find_packages(exclude=['tests', 'tests.*']),
     dependency_links=dependency_links,
+    install_requires=install_requires,
     entry_points={
         'console_scripts': [
             'tcelery = tcelery.__main__:main',
