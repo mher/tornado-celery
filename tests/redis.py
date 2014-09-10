@@ -5,13 +5,13 @@ from tornado.testing import AsyncTestCase
 from tornado.ioloop import IOLoop
 
 
-def with_nonblocking_producer(app):
+def with_nonblocking_producer(app, timeout=None):
     def wrapped(f):
         @wraps(f)
         def inner(self):
             setup_nonblocking_producer(app, self.io_loop,
                                        on_ready=lambda: f(self))
-            self.wait()
+            self.wait(timeout=timeout)
         return inner
     return wrapped
 
@@ -42,3 +42,11 @@ class RedisTests(AsyncTestCase):
             self.stop()
         redis_tasks.echo.apply_async(
             args=['hello'], kwargs={'timestamp': True}, callback=done)
+
+    @with_nonblocking_producer(redis_tasks.celery, timeout=10)
+    def test_timeout(self):
+        def done(response):
+            self.stop()
+            assert False, "This should not be called"
+        redis_tasks.celery.conf.CELERY_TASK_RESULT_EXPIRES = 2
+        redis_tasks.sleep.apply_async(args=[5], callback=done)

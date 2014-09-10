@@ -1,4 +1,5 @@
 from functools import partial
+from datetime import timedelta
 
 from tornado import gen
 from tornadoredis import Client
@@ -53,12 +54,20 @@ class RedisConsumer(object):
         self.subscriber = CelerySubscriber(self.client)
 
     def wait_for(self, task_id, callback, expires=None):
-        # TODO: here we should add a timeout on ioloop to remove the callback
-        # and unsubscribe the channel when the expires timeout is reached
         key = self.producer.app.backend.get_key_for_task(task_id)
+        if expires:
+            timeout = self.producer.conn_pool.io_loop.add_timeout(
+                timedelta(microseconds=expires), self.on_timeout, key)
+        else:
+            timeout = None
         self.subscriber.subscribe(
-            key, partial(self.on_result, key, callback))
+            key, partial(self.on_result, key, callback, timeout))
 
-    def on_result(self, key, callback, result):
+    def on_result(self, key, callback, timeout, result):
+        if timeout:
+            self.producer.conn_pool.io_loop.remove_timeout(timeout)
         self.subscriber.unsubscribe_channel(key)
         callback(result)
+
+    def on_timeout(self, key):
+        self.subscriber.unsubscribe_channel(key)
