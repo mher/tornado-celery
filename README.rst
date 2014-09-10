@@ -37,7 +37,9 @@ Calling tasks with generator-based interface: ::
             self.write(str(response.result))
             self.finish()
 
-**NOTE:** Currently callbacks only work with AMQP backend
+**NOTE:** Currently callbacks only work with AMQP and Redis backends.
+To use the Redis backend, you must install `tornado-redis
+<https://github.com/leporo/tornado-redis>`_.
 
 tornado-celery can be launched as a web server: ::
 
@@ -77,3 +79,15 @@ Documentation
 Documentation is available at `Read the Docs`_
 
 .. _Read the Docs: http://tornado-celery.readthedocs.org
+
+
+Running the Redis Tests
+-----------------
+
+First, make sure redis and celery are running, then run the examples Celery worker:
+
+    python examples/redis_tasks.py worker
+
+and run the tests:
+
+    nosetests tests/redis.py
