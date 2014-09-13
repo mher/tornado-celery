@@ -242,7 +242,7 @@ Apply tasks synchronously. Function returns when the task is finished
             response['result'] = result.result
         else:
             response['traceback'] = result.traceback
-            response['error'] = result.result
+            response['error'] = repr(result.result)
         self.write(response)
         self.finish()
 
