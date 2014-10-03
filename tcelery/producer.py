@@ -92,10 +92,14 @@ class NonBlockingTaskProducer(TaskProducer):
 
     @cached_property
     def consumer(self):
-        return {
+        Consumer = {
             AMQPBackend: AMQPConsumer,
             RedisBackend: RedisConsumer
-        }[type(self.app.backend)](self)
+        }[type(self.app.backend)]
+        if not Consumer:
+            raise RuntimeError(
+                "tornado-redis must be installed to use the redis backend")
+        return Consumer(self)
 
     def decode(self, payload):
         payload = is_py3k and payload or str(payload)
