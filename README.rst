@@ -81,13 +81,17 @@ Documentation is available at `Read the Docs`_
 .. _Read the Docs: http://tornado-celery.readthedocs.org
 
 
-Running the Redis Tests
+Running the Tests
 -----------------
 
-First, make sure redis and celery are running, then run the examples Celery worker:
+To run the tests for the AMQP backend:
 
-    python examples/redis_tasks.py worker
+    $ python examples/tasks.py worker
+    $ cd examples && python -m tcelery -A tasks
+    $ python tests/functests.py
 
-and run the tests:
+To run the tests for the Redis backend, first make sure redis is running, then:
 
-    nosetests tests/redis.py
+    $ CELERY_RESULT_BACKEND=redis:// python examples/tasks.py worker
+    $ cd examples && CELERY_RESULT_BACKEND=redis:// python -m tcelery -A tasks
+    $ python tests/functests.py
