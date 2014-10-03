@@ -27,9 +27,10 @@ class AMQPConsumer(object):
         self.producer = producer
 
     def wait_for(self, task_id, callback, expires=None):
-        self.producer.consume(task_id.replace('-', ''),
-                              lambda *args: callback(args[3]),
-                              x_expires=expires)
+        conn = self.producer.conn_pool.connection()
+        conn.consume(task_id.replace('-', ''),
+                     lambda *args: callback(args[3]),
+                     x_expires=expires)
 
 
 class NonBlockingTaskProducer(TaskProducer):
