@@ -6,7 +6,7 @@ from urlparse import urljoin
 from tornado import ioloop, gen
 from tornado.escape import json_encode, json_decode
 
-import tasks
+from examples import tasks
 
 
 class TestCase(unittest.TestCase):
