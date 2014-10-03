@@ -84,13 +84,13 @@ Documentation is available at `Read the Docs`_
 Running the Tests
 -----------------
 
-To run the tests for the AMQP backend:
+To run the tests for the AMQP backend: ::
 
     $ python examples/tasks.py worker
     $ cd examples && python -m tcelery -A tasks
     $ python tests/functests.py
 
-To run the tests for the Redis backend, first make sure redis is running, then:
+To run the tests for the Redis backend, first make sure redis is running, then: ::
 
     $ CELERY_RESULT_BACKEND=redis:// python examples/tasks.py worker
     $ cd examples && CELERY_RESULT_BACKEND=redis:// python -m tcelery -A tasks
