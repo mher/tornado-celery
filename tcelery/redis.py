@@ -45,10 +45,10 @@ class RedisConsumer(object):
     def __init__(self, producer):
         self.producer = producer
         backend = producer.app.backend
-        self.client = RedisClient(host=backend.host,
-                                  port=backend.port,
-                                  password=backend.password,
-                                  selected_db=backend.db,
+        self.client = RedisClient(host=backend.connparams['host'],
+                                  port=backend.connparams['port'],
+                                  password=backend.connparams['password'],
+                                  selected_db=backend.connparams['db'],
                                   io_loop=producer.conn_pool.io_loop)
         self.client.connect()
         self.subscriber = CelerySubscriber(self.client)
