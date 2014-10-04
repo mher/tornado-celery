@@ -5,7 +5,7 @@ import celery
 from tornado import web
 from tornado.options import define, options
 
-from . import handlers as _ # noqa
+from . import handlers as _  # noqa
 from .utils import route
 
 

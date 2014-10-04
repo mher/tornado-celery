@@ -83,6 +83,7 @@ Apply tasks asynchronously by sending a message
         result = task.apply_async(args=args, kwargs=kwargs, **options)
         self.write({'task-id': result.task_id, 'state': result.state})
 
+
 @route('/tasks/result/(.*)/')
 class TaskResultHandler(web.RequestHandler):
     def get(self, task_id):
@@ -225,8 +226,8 @@ Apply tasks synchronously. Function returns when the task is finished
         htimeout = None
         if timeout:
             htimeout = ioloop.IOLoop.instance().add_timeout(
-                    timedelta(seconds=timeout),
-                    partial(self.on_time, task_id))
+                timedelta(seconds=timeout),
+                partial(self.on_time, task_id))
 
         task.apply_async(args=args, kwargs=kwargs, task_id=task_id,
                          callback=partial(self.on_complete, htimeout),

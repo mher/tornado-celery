@@ -41,7 +41,7 @@ class NonBlockingTaskProducer(TaskProducer):
 
     def __init__(self, channel=None, *args, **kwargs):
         super(NonBlockingTaskProducer, self).__init__(
-                channel, *args, **kwargs)
+            channel, *args, **kwargs)
 
     def publish(self, body, routing_key=None, delivery_mode=None,
                 mandatory=False, immediate=False, priority=0,

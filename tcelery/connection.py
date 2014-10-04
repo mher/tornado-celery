@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 try:
     from urlparse import urlparse
-except ImportError: # py3k
+except ImportError:  # py3k
     from urllib.parse import urlparse
 from functools import partial
 from itertools import cycle
@@ -43,15 +43,16 @@ class Connection(object):
 
         params = pika.ConnectionParameters(**options)
         try:
-            TornadoConnection(params, stop_ioloop_on_close=False,
-                              on_open_callback=partial(self.on_connect, callback),
-                              custom_ioloop=self.io_loop)
+            TornadoConnection(
+                params, stop_ioloop_on_close=False,
+                on_open_callback=partial(self.on_connect, callback),
+                custom_ioloop=self.io_loop)
         except AMQPConnectionError:
             logging.info('Retrying to connect in 2 seconds')
             self.io_loop.add_timeout(
-                    timedelta(seconds=2),
-                    partial(self.connect, url=url,
-                            options=options, callback=callback))
+                timedelta(seconds=2),
+                partial(self.connect, url=url,
+                        options=options, callback=callback))
 
     def on_connect(self, callback, connection):
         self.connection = connection
@@ -94,9 +95,9 @@ class Connection(object):
 
         properties = pika.BasicProperties(content_type=content_type)
 
-        self.channel.basic_publish(exchange=exchange, routing_key=routing_key, body=body,
-                                   properties=properties, mandatory=mandatory,
-                                   immediate=immediate)
+        self.channel.basic_publish(exchange=exchange, routing_key=routing_key,
+                                   body=body, properties=properties,
+                                   mandatory=mandatory, immediate=immediate)
 
     def consume(self, queue, callback, x_expires=None):
         assert self.channel
