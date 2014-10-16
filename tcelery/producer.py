@@ -12,7 +12,6 @@ from celery.utils import timeutils
 
 from .result import AsyncResult
 
-
 try:
     from .redis import RedisConsumer
 except ImportError:
@@ -29,8 +28,16 @@ class AMQPConsumer(object):
         if persistent is None:
             persistent = True
         conn = self.producer.conn_pool.connection()
+
+        def consume_callback(channel, deliver, properties, reply):
+            callback(reply)
+            try:
+                channel.basic_cancel(consumer_tag=deliver.consumer_tag, nowait=True)
+            except Exception:
+                pass
+
         conn.consume(task_id.replace('-', ''),
-                     lambda *args: callback(args[3]),
+                     consume_callback,
                      x_expires=expires, persistent=persistent)
 
 
