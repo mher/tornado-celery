@@ -53,7 +53,7 @@ class RedisConsumer(object):
         self.client.connect()
         self.subscriber = CelerySubscriber(self.client)
 
-    def wait_for(self, task_id, callback, expires=None):
+    def wait_for(self, task_id, callback, expires=None, persistent=None):
         key = self.producer.app.backend.get_key_for_task(task_id)
         if expires:
             timeout = self.producer.conn_pool.io_loop.add_timeout(

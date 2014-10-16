@@ -1,19 +1,18 @@
 from __future__ import absolute_import
 
 import sys
-
 from functools import partial
 from datetime import timedelta
-
 from kombu import serialization
 from kombu.utils import cached_property
-
 from celery.app.amqp import TaskProducer
 from celery.backends.amqp import AMQPBackend
 from celery.backends.redis import RedisBackend
 from celery.utils import timeutils
 
 from .result import AsyncResult
+
+
 try:
     from .redis import RedisConsumer
 except ImportError:
@@ -26,11 +25,13 @@ class AMQPConsumer(object):
     def __init__(self, producer):
         self.producer = producer
 
-    def wait_for(self, task_id, callback, expires=None):
+    def wait_for(self, task_id, callback, expires=None, persistent=None):
+        if persistent is None:
+            persistent = True
         conn = self.producer.conn_pool.connection()
         conn.consume(task_id.replace('-', ''),
                      lambda *args: callback(args[3]),
-                     x_expires=expires)
+                     x_expires=expires, persistent=persistent)
 
 
 class NonBlockingTaskProducer(TaskProducer):
@@ -87,7 +88,8 @@ class NonBlockingTaskProducer(TaskProducer):
         if callback:
             self.consumer.wait_for(task_id,
                                    partial(self.on_result, task_id, callback),
-                                   self.prepare_expires(type=int))
+                                   expires=self.prepare_expires(type=int),
+                                   persistent=self.app.conf.CELERY_RESULT_PERSISTENT)
         return result
 
     @cached_property
