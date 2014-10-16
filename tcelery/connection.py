@@ -99,11 +99,11 @@ class Connection(object):
                                    body=body, properties=properties,
                                    mandatory=mandatory, immediate=immediate)
 
-    def consume(self, queue, callback, x_expires=None):
+    def consume(self, queue, callback, x_expires=None, persistent=True):
         assert self.channel
         self.channel.queue_declare(self.on_queue_declared, queue=queue,
                                    exclusive=False, auto_delete=True,
-                                   nowait=True, durable=True,
+                                   nowait=True, durable=persistent,
                                    arguments={'x-expires': x_expires})
         self.channel.basic_consume(callback, queue, no_ack=True)
 
