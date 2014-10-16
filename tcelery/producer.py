@@ -12,6 +12,7 @@ from celery.utils import timeutils
 
 from .result import AsyncResult
 
+
 try:
     from .redis import RedisConsumer
 except ImportError:
