@@ -86,6 +86,11 @@ class NonBlockingTaskProducer(TaskProducer):
          self.encoder) = serialization.registry._encoders[self.serializer]
 
         conn = self.conn_pool.connection()
+
+        for entity in declare:
+            entity.maybe_bind(self.channel)
+            entity.declare()
+
         publish = conn.publish
         result = publish(body, priority=priority, content_type=content_type,
                          content_encoding=content_encoding, headers=headers,
