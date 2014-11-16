@@ -5,6 +5,8 @@ from functools import partial
 from datetime import timedelta
 from kombu import serialization
 from kombu.utils import cached_property
+from kombu import common
+
 from celery.app.amqp import TaskProducer
 from celery.backends.amqp import AMQPBackend
 from celery.backends.redis import RedisBackend
@@ -87,9 +89,9 @@ class NonBlockingTaskProducer(TaskProducer):
 
         conn = self.conn_pool.connection()
 
+        # auto create/bind exchange/queue for the first call and caches
         for entity in declare:
-            entity.maybe_bind(self.channel)
-            entity.declare()
+            common.maybe_declare(entity, self.channel, retry=True)
 
         publish = conn.publish
         result = publish(body, priority=priority, content_type=content_type,
