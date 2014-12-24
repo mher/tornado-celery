@@ -14,7 +14,29 @@ __version__ = '.'.join(map(str, VERSION)) + '-dev'
 
 def setup_nonblocking_producer(celery_app=None, io_loop=None,
                                on_ready=None, result_cls=AsyncResult,
-                               limit=1, producer_cls=NonBlockingTaskProducer):
+                               limit=1, producer_cls=NonBlockingTaskProducer,
+                               callback=None):
+    """Setup celery to use non blocking producer
+
+    :param celery_app:
+    :param io_loop:
+    :param on_ready: alias for callback
+    :param result_cls:
+    :param limit:
+    :param producer_cls:
+    :param callback: Callback after connection is established
+    :return:
+
+    :type limit: int
+    :type io_loop: tornado.ioloop.IOLoop
+    :type on_ready: Function
+    :type callback: Function
+    """
+
+    if on_ready is not None:
+        assert callback is None, 'you may only supply either: on_ready or callback'
+        callback = on_ready
+
     celery_app = celery_app or celery.current_app
     io_loop = io_loop or ioloop.IOLoop.instance()
 
@@ -29,6 +51,6 @@ def setup_nonblocking_producer(celery_app=None, io_loop=None,
         options = celery_app.conf.get('CELERYT_PIKA_OPTIONS', {})
         producer_cls.conn_pool.connect(broker_url,
                                        options=options,
-                                       callback=on_ready)
+                                       callback=callback)
 
     io_loop.add_callback(connect)
