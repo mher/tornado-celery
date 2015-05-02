@@ -1,10 +1,11 @@
 Celery integration with Tornado
 ===============================
 
-.. image:: https://badge.fury.io/py/tornado-celery.png
-        :target: http://badge.fury.io/py/tornado-celery
-.. image:: https://pypip.in/d/tornado-celery/badge.png
-        :target: https://crate.io/packages/tornado-celery/
+.. image:: https://img.shields.io/pypi/v/tornado-celery.svg
+    :target: https://pypi.python.org/pypi/tornado-celery
+
+.. image:: https://img.shields.io/pypi/dm/tornado-celery.svg
+        :target: https://pypi.python.org/pypi/tornado-celery
 
 tornado-celery is a non-blocking Celery client for Tornado web framework
 
