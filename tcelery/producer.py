@@ -32,16 +32,18 @@ class AMQPConsumer(object):
             persistent = True
         conn = self.producer.conn_pool.connection()
 
+        nowait = self.producer.app.conf.get('TCELERY_RESULT_NOWAIT', True)
+
         def consume_callback(channel, deliver, properties, reply):
             callback(reply)
             try:
-                channel.basic_cancel(consumer_tag=deliver.consumer_tag, nowait=True)
+                channel.basic_cancel(consumer_tag=deliver.consumer_tag, nowait=nowait)
             except Exception:
                 pass
 
         conn.consume(task_id.replace('-', ''),
                      consume_callback,
-                     x_expires=expires, persistent=persistent)
+                     x_expires=expires, persistent=persistent, nowait=nowait)
 
 
 class NonBlockingTaskProducer(TaskProducer):
