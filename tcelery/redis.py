@@ -17,9 +17,9 @@ class CelerySubscriber(BaseSubscriber):
     def on_message(self, msg):
         if not msg:
             return
-        if msg.kind.decode('ascii') == 'message' and msg.body:
+        if msg.kind.decode('utf-8') == 'message' and msg.body:
             # Get the list of subscribers for this channel
-            for subscriber in self.subscribers[msg.channel.decode('ascii')].keys():
+            for subscriber in self.subscribers[msg.channel.decode('utf-8')].keys():
                 subscriber(msg.body)
         super(CelerySubscriber, self).on_message(msg)
 
@@ -54,7 +54,7 @@ class RedisConsumer(object):
         self.subscriber = CelerySubscriber(self.client)
 
     def wait_for(self, task_id, callback, expires=None, persistent=None):
-        key = self.producer.app.backend.get_key_for_task(task_id).decode('ascii')
+        key = self.producer.app.backend.get_key_for_task(task_id).decode('utf-8')
         if expires:
             timeout = self.producer.conn_pool.io_loop.add_timeout(
                 timedelta(microseconds=expires), self.on_timeout, key)
