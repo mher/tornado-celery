@@ -7,11 +7,18 @@ from kombu import serialization
 from kombu.utils import cached_property
 from kombu import common
 
-from celery.app.amqp import TaskProducer
+try:
+    from celery.app.amqp import TaskProducer
+except ImportError:
+    # celery version 4.0+
+    from kombu import Producer as TaskProducer
 from celery.backends.amqp import AMQPBackend
 from celery.backends.redis import RedisBackend
-from celery.utils import timeutils
-
+try:
+    from celery.utils import timeutils
+except ImportError:
+    # celery version 4.0+
+    from celery.utils import time as timeutils
 from .result import AsyncResult
 
 
@@ -24,6 +31,7 @@ is_py3k = sys.version_info >= (3, 0)
 
 
 class AMQPConsumer(object):
+
     def __init__(self, producer):
         self.producer = producer
 
